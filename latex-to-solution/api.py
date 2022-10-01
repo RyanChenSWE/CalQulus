@@ -33,22 +33,25 @@ MAX_CHARACTERS = 200
 
 # # print(f"Query: '{r}'.")
 # equation = "osculating circle y = x^2 at x = 2"
-equation = "derivative of 3x^2-2"
-query = urllib.parse.quote_plus(f"solve {equation}")
+equation = "solve for x^2=1"
+query = urllib.parse.quote_plus(f"{equation}")
 query_url = f"http://api.wolframalpha.com/v2/query?" \
             f"appid={appid}" \
             f"&input={query}" \
-            f"&scanner=Solve" \
             f"&podstate=Result__Step-by-step+solution" \
             "&format=plaintext" \
             f"&output=json"
 
 r = requests.get(query_url).json()["queryresult"]
+
+pprint(r)
+
 if r["numpods"] == 0:
   print("No results found.")
 elif r["pods"][0]["subpods"][0]["plaintext"] == '(no solutions exist)' or r["pods"][0]["subpods"][0]["plaintext"] == '(no solution exists)':
   print("No solutions found.")
 else:
+  print(r["pods"][0]["subpods"][0])
   print(r["pods"][0]["subpods"][0]["plaintext"])
 
 # data = r["queryresult"]["pods"][0]["subpods"]
