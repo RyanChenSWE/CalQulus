@@ -1,18 +1,55 @@
 from pprint import pprint
 import requests
-import os
 import urllib.parse
 
-os.environ['WOLFRAM_ALPHA_APP_ID'] = '8QG9EK-E6HUAUGP6H'
-appid = os.environ.get('WOLFRAM_ALPHA_APP_ID')
+from decouple import config
 
-query = urllib.parse.quote_plus("4+5")
+appid = config('WOLFRAM_ALPHA_APP_ID')
+
+MAX_CHARACTERS = 200
+
+# queries = ["Suzie has 3 apples and I am worthless, how much am I worth?"]
+# queries = filter(lambda x: len(x) < MAX_CHARACTERS, queries)
+# queries = map(lambda x: urllib.parse.quote(x), queries)
+
+# for query in queries:
+#   query_url = f"http://api.wolframalpha.com/v2/query?" \
+#       f"appid={appid}" \
+#       f"&input={query}" \
+#       f"&format=plaintext" \
+#       f"&output=json"
+
+#   r = requests.get(query_url).json()
+
+#   print(r['queryresult'])
+
+#   print(r['queryresult']['pods'][0]['subpods'][0]['plaintext'])
+
+# # print(f"Query: '{r}'.")
+# equation = "osculating circle y = x^2 at x = 2"
+equation = "derivative of 3x-2"
+query = urllib.parse.quote_plus(f"solve {equation}")
 query_url = f"http://api.wolframalpha.com/v2/query?" \
-    f"appid={appid}" \
-    f"&input={query}" \
-    f"&format=plaintext" \
-    f"&output=json"
+            f"appid={appid}" \
+            f"&input={query}" \
+            f"&scanner=Solve" \
+            f"&podstate=Result__Step-by-step+solution" \
+            "&format=plaintext" \
+            f"&output=json"
 
-r = requests.get(query_url).json()
+r = requests.get(query_url).json()["queryresult"]
+if r["numpods"] == 0:
+    print("No results found.")
+elif r["numpods"]["pod"]["subpods"]["plaintext"] == '(no solutions exist)' or r["numpods"]["pod"]["subpods"]["plaintext"] == '(no solution exists)':
+    print("No solutions found.")
+else:
+    pprint(r["numpods"]["pod"]["subpods"]["plaintext"])
 
-print(f"Query: '{r}'.")
+pprint(r)
+
+# data = r["queryresult"]["pods"][0]["subpods"]
+# result = data[0]["plaintext"]
+# steps = data[1]["plaintext"]
+
+# print(f"Result of {equation} is '{result}'.\n")
+# print(f"Possible steps to solution:\n\n{steps}")
