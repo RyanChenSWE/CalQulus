@@ -38,15 +38,26 @@ query_url = f"http://api.wolframalpha.com/v2/query?" \
 
 r = requests.get(query_url).json()["queryresult"]
 
-pprint(r)
+# pprint(r)
 
-if r["numpods"] == 0:
-  print("No results found.")
-elif r["pods"][0]["subpods"][0]["plaintext"] == '(no solutions exist)' or r["pods"][0]["subpods"][0]["plaintext"] == '(no solution exists)':
-  print("No solutions found.")
-else:
-  print(r["pods"][0]["subpods"][0])
-  print(r["pods"][0]["subpods"][0]["plaintext"])
+# filter by succeeded and non errored pods, change to json
+pods = list(filter(lambda pod: not pod['error'], r['pods']))
+
+# pprint(pods)
+
+# filter out pods with empty titles in each subpod
+pods = list(filter(lambda pod: not all(map(lambda subpod: subpod['title'] == '', pod['subpods'])), pods))
+
+# print second plaintext in subpod
+print(pods[0]['subpods'][1]['plaintext'])
+
+# if r["numpods"] == 0:
+#   print("No results found.")
+# elif r["pods"][0]["subpods"][0]["plaintext"] == '(no solutions exist)' or r["pods"][0]["subpods"][0]["plaintext"] == '(no solution exists)':
+#   print("No solutions found.")
+# else:
+#   pprint(r["pods"][0]["subpods"][0])
+#   pprint(r["pods"][0]["subpods"][0]["plaintext"])
 
 # data = r["queryresult"]["pods"][0]["subpods"]
 # result = data[0]["plaintext"]
