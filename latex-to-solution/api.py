@@ -4,6 +4,12 @@ import urllib.parse
 
 from decouple import config
 
+### FUNCTIONS ### 
+
+def matrixConvert(s): 
+    s = '[[' + s[s.index('}') + 1:].replace("&", ",").replace('\\\\', '],[').replace(' ', '')
+    return s[:s.index('\\')] + ']]'
+
 appid = config('WOLFRAM_ALPHA_APP_ID')
 
 MAX_CHARACTERS = 200
