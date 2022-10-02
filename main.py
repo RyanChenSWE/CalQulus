@@ -67,8 +67,8 @@ def main():
 	font = cv.FONT_HERSHEY_SIMPLEX
 	org = (50, 50)
 	org2 = (50, 50)
-	fontScale = 1.5
-	color = (0, 255, 0)
+	fontScale = 1
+	color = (0, 0, 0)
 	thickness = 2
 
 	while True:
@@ -76,8 +76,8 @@ def main():
 			res = pending.popleft().get()
 			res = cv.putText(res, ans, (x, y-50), font, 
                    fontScale, color, thickness, cv.LINE_AA)
-			# res = cv.putText(res, final_ans, org2, font, 
-            #        fontScale, color, thickness, cv.LINE_AA)
+			res = cv.putText(res, final_ans, (x - (len(final_ans) * 4), y + h + 50), font, 
+                   1, color, thickness, cv.LINE_AA)
 			
 			res = cv.rectangle(res, (x, y), (x + w, y + h), color, 2)
 			cv.imshow('Camera', res)
@@ -116,11 +116,13 @@ def getLatexInfinite():
 		# try:
 		num = int(input())
 		global ans, final_ans
-		if (num == 0):
+		if num == 0:
+			for i in range(10):
+				getLatex()
+		elif num == 1: 
 			ans = r"\int\frac{1 + \cos x}{x + \sin x}dx"
 			final_ans = latexSolver(ans)
 			
-		# getLatex()
 		# except:
 		# 	print("it's fine")
 
