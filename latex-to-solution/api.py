@@ -4,11 +4,14 @@ import urllib.parse
 
 from decouple import config
 
-### FUNCTIONS ### 
+### FUNCTIONS ###
 
-def matrixConvert(s): 
-    s = '[[' + s[s.index('}') + 1:].replace("&", ",").replace('\\\\', '],[').replace(' ', '')
+
+def matrixConvert(s):
+    s = '[[' + s[s.index('}') + 1:].replace("&",
+                                            ",").replace('\\\\', '],[').replace(' ', '')
     return s[:s.index('\\')] + ']]'
+
 
 appid = config('WOLFRAM_ALPHA_APP_ID')
 
@@ -31,31 +34,31 @@ MAX_CHARACTERS = 200
 
 #   print(r['queryresult']['pods'][0]['subpods'][0]['plaintext'])
 
-# # print(f"Query: '{r}'.")
-# equation = "osculating circle y = x^2 at x = 2"
-equation = "solve for x^2=1"
+# print(f"Query: '{r}'.")
+equation = "derivative of x^2"
 query = urllib.parse.quote_plus(f"{equation}")
-query_url = f"http://api.wolframalpha.com/v2/query?" \
+query_url = "http://api.wolframalpha.com/v2/query?" \
             f"appid={appid}" \
             f"&input={query}" \
-            f"&podstate=Result__Step-by-step+solution" \
+            "&podstate=Result__Step-by-step+solution" \
             "&format=plaintext" \
-            f"&output=json"
+            "&output=json"
 
 r = requests.get(query_url).json()["queryresult"]
 
-# pprint(r)
+pprint(r)
 
-# filter by succeeded and non errored pods, change to json
-pods = list(filter(lambda pod: not pod['error'], r['pods']))
+# get results pod
+results_pod = list(filter(lambda x: x['numsubpods'] > 0 and x['subpods'][0]['plaintext'] != '', r['pods']))[0]['subpods'][0]['plaintext']
 
-# pprint(pods)
+if (len(results_pod) == 0):
+    print("No steps shown.")
+else:
+    print(results_pod)
 
-# filter out pods with empty titles in each subpod
-pods = list(filter(lambda pod: not all(map(lambda subpod: subpod['title'] == '', pod['subpods'])), pods))
 
 # print second plaintext in subpod
-print(pods[0]['subpods'][1]['plaintext'])
+# print(pods[0]['subpods'][1]['plaintext'])
 
 # if r["numpods"] == 0:
 #   print("No results found.")
