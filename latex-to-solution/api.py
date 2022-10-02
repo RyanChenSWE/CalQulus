@@ -35,8 +35,7 @@ MAX_CHARACTERS = 200
 #   print(r['queryresult']['pods'][0]['subpods'][0]['plaintext'])
 
 # print(f"Query: '{r}'.")
-equation = "derivative of x^2"
-query = urllib.parse.quote_plus(f"{equation}")
+query = urllib.parse.quote_plus(input())
 query_url = "http://api.wolframalpha.com/v2/query?" \
             f"appid={appid}" \
             f"&input={query}" \
@@ -46,15 +45,28 @@ query_url = "http://api.wolframalpha.com/v2/query?" \
 
 r = requests.get(query_url).json()["queryresult"]
 
-pprint(r)
+# pprint(r)
 
-# get results pod
-results_pod = list(filter(lambda x: x['numsubpods'] > 0 and x['subpods'][0]['plaintext'] != '', r['pods']))[0]['subpods'][0]['plaintext']
+#check if a pod contains id "Result"
+if any(pod["id"] == "Result" for pod in r["pods"]):
 
-if (len(results_pod) == 0):
-    print("No steps shown.")
+    #get the pod with id "Result"
+    result_pod = next(pod for pod in r["pods"] if pod["id"] == "Result")
+
+    # print all plaintexts in the pod
+    for subpod in result_pod["subpods"]:
+        print(subpod["plaintext"])
+
+    # print(next(pod["subpods"][0]["plaintext"] for pod in r["pods"] if pod["id"] == "Result"))
 else:
-    print(results_pod)
+    # get results pod
+    results_pod = list(filter(lambda x: x['numsubpods'] > 0 and x['subpods']
+                      [0]['plaintext'] != '', r['pods']))[0]['subpods'][0]['plaintext']
+
+    if (len(results_pod) == 0):
+        print("No steps shown.")
+    else:
+        print(results_pod)
 
 
 # print second plaintext in subpod
