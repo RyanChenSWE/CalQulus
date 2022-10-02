@@ -24,7 +24,15 @@ def latexSolver(query):
               "&format=plaintext" \
               "&output=json"
 
+  query_url_image = "http://api.wolframalpha.com/v2/query?" \
+              f"appid={appid}" \
+              f"&input={query}" \
+              "&output=json"
+
   r = requests.get(query_url).json()["queryresult"]
+  r2 = requests.get(query_url_image).json()["queryresult"]
+
+  pprint(r2)
 
   # check if a pod contains id "Result"
   if any(pod["id"] == "Result" for pod in r["pods"]):
@@ -44,3 +52,5 @@ def latexSolver(query):
           print("No steps shown.")
       else:
           print(results_pod)
+
+latexSolver('a')
