@@ -15,9 +15,11 @@ from collections import deque
 from api import latexSolver
 import subprocess
 import time
+from bbox import create_bboxes
 
 img_path = "/Users/stevengong/Projects/HackMIT/image.jpg"
 
+ans = "2+2=4" # To do: Store this in LaTeX
 class DummyTask:
 	def __init__(self, data):
 		self.data = data
@@ -46,17 +48,29 @@ def main():
 	threaded_mode = True
 
 	count = 0 
+	
+	# font
+	font = cv.FONT_HERSHEY_SIMPLEX
+	org = (50, 50)
+	fontScale = 1
+	color = (255, 0, 0)
+	thickness = 2
+
 	while True:
 		while len(pending) > 0 and pending[0].ready():
 			res = pending.popleft().get()
+			res = cv.putText(res, ans, org, font, 
+                   fontScale, color, thickness, cv.LINE_AA)
 			cv.imshow('threaded video', res)
 		if len(pending) < threadn:
 			_ret, frame = cap.read()
 			if threaded_mode:
+				count += 1
+				count %= 2
 				if (count == 0): 
 					task = pool.apply_async(save_frame, (frame.copy(),))
 				else: # In case you want to alternate between tasks
-					task = pool.apply_async(save_frame, (frame.copy(),))
+					task = pool.apply_async(create_bboxes, (frame.copy(),))
 			else:
 				task = DummyTask(save_frame(frame))
 			pending.append(task)
@@ -77,12 +91,11 @@ def getLatex():
 			ans = result.stdout.decode('utf-8').split(' ', 1)[1]
 			print(ans)
 			if (len(ans) > 3):
-				ans = latexSolver(ans)
+				# ans = latexSolver(ans)
 				print(ans)
 				time.sleep(100)
 		except:
 			print("No LaTeX detected")
-	
 	
 	return frame
 
