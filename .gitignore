@@ -4,4 +4,5 @@
 /tempCodeRunnerFile.py
 .DS_Store
 __pycache__
+.vscode
 venv/
