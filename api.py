@@ -2,8 +2,9 @@ from pprint import pprint
 import requests
 import urllib.parse
 import ast
-from sympy import preview
+from sympy import preview, sympify, latex
 from decouple import config
+from pytexit import py2tex as p2t
 
 ### FUNCTIONS ###
 
@@ -16,6 +17,10 @@ appid = config('WOLFRAM_ALPHA_APP_ID')
 MAX_CHARACTERS = 200
 
 def latexSolver(query): 
+  # check if there's an equal sign between two strings
+  if '=' in query:
+    # add 'solve' to the beginning of the query
+    query = 'solve ' + query
   query = urllib.parse.quote_plus(query)
   query_url = "http://api.wolframalpha.com/v2/query?" \
               f"appid={appid}" \
@@ -34,8 +39,8 @@ def latexSolver(query):
       # get the pod with id "Result"
       result_pod = next(pod for pod in r["pods"] if pod["id"] == "Result")
 
-      # return all plaintexts in the pod joined together
-      return "\n".join(subpod["plaintext"] for subpod in result_pod["subpods"])
+      # return all plaintexts in the pod joined together, replace all round brackets with curly brackets
+      return "\n".join(subpod["plaintext"] for subpod in result_pod["subpods"]).replace('(', '{').replace(')', '}')
   else:
       # get results pod
       results_pod = list(filter(lambda x: x['numsubpods'] > 0 and x['subpods']
@@ -44,7 +49,7 @@ def latexSolver(query):
       if (len(results_pod) == 0):
           return "No steps shown."
       else:
-          return results_pod
+          return results_pod.replace('(', '{').replace(')', '}')
 
 class LatexVisitor(ast.NodeVisitor):
 
@@ -56,7 +61,12 @@ class LatexVisitor(ast.NodeVisitor):
         args = ', '.join(map(self.visit, n.args))
         if func == 'sqrt':
             return '\sqrt{%s}' % args
+        elif func == 'log':
+            return '\log_{%s}' % args
+        elif func == '±':
+            return '\pm'
         else:
+            # return pure string if not parseable
             return r'\operatorname{%s}\left(%s\right)' % (func, args)
 
     def prec_Call(self, n):
@@ -188,11 +198,15 @@ def py2tex(expr):
     pt = ast.parse(expr)
     return LatexVisitor().visit(pt.body[0].value)
 
+print(latexSolver("y'=y''-y"))
+
 # print(py2tex("x=2**3"))
 # print(py2tex("2*x+constant"))
-print(latexSolver("derivative of 2x^(3xlogx)"))
-print(latexSolver("solve y'=y''-y"))
-print(py2tex(latexSolver("solve y'=y''-y")))
+# print(latexSolver("derivative of 2x^(3xlogx)"))
+# print(latexSolver("y'=y''-y"))
+# print(py2tex(latexSolver("6 = 3x")))
+# print(latex(sympify("y'=y''-y")))
+# print(p2t(latexSolver("y'=y''-y")))
 
 # UNCOMMENT OUT THE FOLLOWING LINE IF SYMPY/LATEX IS INSTALLED PROPERLY
 # preview(r'$$\\int_0^1 e^x\\,dx$$', viewer='file', filename='test.png', euler=False)
