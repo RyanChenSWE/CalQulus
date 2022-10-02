@@ -15,6 +15,7 @@ from collections import deque
 from api import latexSolver
 import subprocess
 import time
+from bbox import get_bbox
 
 img_path = "/Users/stevengong/Projects/HackMIT/image.jpg"
 
@@ -49,9 +50,10 @@ def main():
 	while True:
 		while len(pending) > 0 and pending[0].ready():
 			res = pending.popleft().get()
-			cv.imshow('threaded video', res)
 		if len(pending) < threadn:
 			_ret, frame = cap.read()
+			im, c = get_bbox(frame)
+			cv.imshow('threaded video', im)
 			if threaded_mode:
 				if (count == 0): 
 					task = pool.apply_async(save_frame, (frame.copy(),))
