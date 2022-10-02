@@ -16,7 +16,7 @@ appid = config('WOLFRAM_ALPHA_APP_ID')
 MAX_CHARACTERS = 200
 
 def latexSolver(query): 
-  query = urllib.parse.quote_plus(input())
+  query = urllib.parse.quote_plus(query)
   query_url = "http://api.wolframalpha.com/v2/query?" \
               f"appid={appid}" \
               f"&input={query}" \

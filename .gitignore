@@ -2,3 +2,5 @@
 .env.local
 .env.local.default
 /tempCodeRunnerFile.py
+.DS_Store
+__pycache__
