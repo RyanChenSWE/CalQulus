@@ -15,7 +15,7 @@ from collections import deque
 from api import latexSolver
 import subprocess
 import time
-from bbox import create_bboxes
+from bbox import get_bbox
 
 img_path = "/Users/stevengong/Projects/HackMIT/image.jpg"
 
@@ -64,6 +64,8 @@ def main():
 			cv.imshow('threaded video', res)
 		if len(pending) < threadn:
 			_ret, frame = cap.read()
+			im, c = get_bbox(frame)
+			cv.imshow('threaded video', im)
 			if threaded_mode:
 				count += 1
 				count %= 2
