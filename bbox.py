@@ -25,3 +25,5 @@ def get_bbox(img):
   cv2.imwrite('test_boxes.jpg',im2)                                      
 
   return im2
+  
+get_bbox(cv2.imread('result.png'))

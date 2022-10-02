@@ -52,5 +52,3 @@ def latexSolver(query):
           print("No steps shown.")
       else:
           print(results_pod)
-
-latexSolver('a')

@@ -14,12 +14,21 @@ import threading
 from collections import deque
 from api import latexSolver
 import subprocess
+from helper import *
 import time
-from bbox import get_bbox
+
+start = time.process_time()
+
 
 img_path = "/Users/stevengong/Projects/HackMIT/image.jpg"
 
-ans = "2+2=4" # To do: Store this in LaTeX
+finished_loading = True
+
+ans = ""
+final_ans = ""
+
+x, y, w, h = 460, 440, 1000, 200 # bounding box
+
 class DummyTask:
 	def __init__(self, data):
 		self.data = data
@@ -30,7 +39,12 @@ class DummyTask:
 
 def save_frame(frame):
 	# some intensive computation...
-	cv.imwrite(img_path, frame)
+	median_grayscale = np.median(frame)
+	gray = get_grayscale(frame)
+	ret, img_thresh1 = cv2.threshold(gray, 0, 255, cv2.THRESH_OTSU | cv2.THRESH_BINARY_INV)
+	# if (time.process_time() - start > 2):
+	cv.imwrite(img_path, frame[y:y+h, x:x+w])
+	# 	start = time.process_time()
 	return frame
 
 def main():
@@ -52,24 +66,27 @@ def main():
 	# font
 	font = cv.FONT_HERSHEY_SIMPLEX
 	org = (50, 50)
-	fontScale = 1
-	color = (255, 0, 0)
+	org2 = (50, 50)
+	fontScale = 1.5
+	color = (0, 255, 0)
 	thickness = 2
 
 	while True:
 		while len(pending) > 0 and pending[0].ready():
 			res = pending.popleft().get()
-			# res = cv.putText(res, ans, org, font, 
-                #    fontScale, color, thickness, cv.LINE_AA)
-			cv.imshow('threaded video', res)
+			res = cv.putText(res, ans, (x, y-50), font, 
+                   fontScale, color, thickness, cv.LINE_AA)
+			# res = cv.putText(res, final_ans, org2, font, 
+            #        fontScale, color, thickness, cv.LINE_AA)
+			
+			res = cv.rectangle(res, (x, y), (x + w, y + h), color, 2)
+			cv.imshow('Camera', res)
 		if len(pending) < threadn:
 			_ret, frame = cap.read()
 			if threaded_mode:
 				count += 1
 				count %= 2
-				# task = pool.apply_async(save_frame, (frame.copy(),))
-				# else: # In case you want to alternate between tasks
-				task = pool.apply_async(get_bbox, (frame.copy(),))
+				task = pool.apply_async(save_frame, (frame.copy(),))
 			else:
 				task = DummyTask(save_frame(frame))
 			pending.append(task)
@@ -81,26 +98,34 @@ def main():
 			break
 
 def getLatex():
-	while True:
-		# result = os.system("pix2tex /Users/stevengong/Projects/HackMIT/junk/test.png")
-		# latex_output = os.system("pix2tex " + img_path)
-		# print("output", latex_output)
-		result = subprocess.run(['pix2tex', '/Users/stevengong/Projects/HackMIT/samples/test3.png'], stdout=subprocess.PIPE)
-		try:
-			ans = result.stdout.decode('utf-8').split(' ', 1)[1]
-			print(ans)
-			if (len(ans) > 3):
-				# ans = latexSolver(ans)
-				print(ans)
-				time.sleep(100)
-		except:
-			print("No LaTeX detected")
+	global finished_loading, ans, final_ans
+	finished_loading = False
+	result = subprocess.run(['pix2tex', img_path], stdout=subprocess.PIPE)
+	try:
+		ans = result.stdout.decode('utf-8').split(' ', 1)[1]
+		if (len(ans) > 3):
+			print("fetching answer for ", ans)
+			final_ans = latexSolver(ans)
+	except:
+		print("No LaTeX detected")
 	
-	return frame
+	finished_loading = True
 
+def getLatexInfinite():
+	while True:
+		# try:
+		num = int(input())
+		global ans, final_ans
+		if (num == 0):
+			ans = r"\int\frac{1 + \cos x}{x + \sin x}dx"
+			final_ans = latexSolver(ans)
+			
+		# getLatex()
+		# except:
+		# 	print("it's fine")
 
 if __name__ == '__main__':
-	thread2 = threading.Thread(target=getLatex)
+	thread2 = threading.Thread(target=getLatexInfinite)
 	thread2.start()
 	main()
 	cv.destroyAllWindows()
