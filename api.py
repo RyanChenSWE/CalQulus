@@ -24,13 +24,6 @@ def latexSolver(query):
               "&format=plaintext" \
               "&output=json"
 
-  # query_url = "http://api.wolframalpha.com/v2/query?" \
-  #             f"appid={appid}" \
-  #             f"&input={query}" \
-  #             "&podstate=Result__Step-by-step+solution" \
-  #             "&format=mathml" \
-  #             "&output=json"
-
   r = requests.get(query_url).json()["queryresult"]
 
   # pprint(r)
@@ -203,6 +196,3 @@ print(py2tex(latexSolver("solve y'=y''-y")))
 
 # UNCOMMENT OUT THE FOLLOWING LINE IF SYMPY/LATEX IS INSTALLED PROPERLY
 # preview(r'$$\\int_0^1 e^x\\,dx$$', viewer='file', filename='test.png', euler=False)
-# print(py2tex(latexSolver("solve x^2 = 4")))
-
-# e = zm.Math(latexSolver("solve 4x^4=2y"))
