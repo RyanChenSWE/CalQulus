@@ -12,7 +12,7 @@ import sys
 from multiprocessing.pool import ThreadPool
 import threading
 from collections import deque
-from api import latexSolver
+# from api import latexSolver
 import subprocess
 from helper import *
 import time
@@ -105,7 +105,7 @@ def getLatex():
 		ans = result.stdout.decode('utf-8').split(' ', 1)[1]
 		if (len(ans) > 3):
 			print("fetching answer for ", ans)
-			final_ans = latexSolver(ans)
+			# final_ans = latexSolver(ans)
 	except:
 		print("No LaTeX detected")
 	
@@ -121,7 +121,7 @@ def getLatexInfinite():
 				getLatex()
 		elif num == 1: 
 			ans = r"\int\frac{1 + \cos x}{x + \sin x}dx"
-			final_ans = latexSolver(ans)
+			# final_ans = latexSolver(ans)
 			
 		# except:
 		# 	print("it's fine")
